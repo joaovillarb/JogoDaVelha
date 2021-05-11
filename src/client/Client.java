@@ -37,71 +37,71 @@ public class Client extends JFrame implements Runnable {
     private final String X_MARK = "X";
     private final String O_MARK = "O";
 
-    // set up user-interface and board
+    
     public Client(String host) {
-        ticTacToeHost = host; // set name of server
-        displayArea = new JTextArea(4, 30); // set up JTextArea
+        ticTacToeHost = host; 
+        displayArea = new JTextArea(4, 30); 
         displayArea.setEditable(false);
         add(new JScrollPane(displayArea), BorderLayout.SOUTH);
 
-        boardPanel = new JPanel(); // set up panel for squares in board
+        boardPanel = new JPanel(); 
         boardPanel.setLayout(new GridLayout(3, 3, 0, 0));
-        board = new Square[3][3]; // create board
+        board = new Square[3][3]; 
 
-        // loop over the rows in the board
+        
         for (int row = 0; row < board.length; row++) {
-            // loop over the columns in the board
+            
             for (int column = 0; column < board[row].length; column++) {
-                // create square
+                
                 board[row][column] = new Square(" ", row * 3 + column);
-                boardPanel.add(board[row][column]); // add square
+                boardPanel.add(board[row][column]); 
             }
         }
 
-        idField = new JTextField(); // set up textfield
+        idField = new JTextField(); 
         idField.setEditable(false);
         add(idField, BorderLayout.NORTH);
 
-        panel2 = new JPanel(); // set up panel to contain boardPanel
-        panel2.add(boardPanel, BorderLayout.CENTER); // add board panel
-        add(panel2, BorderLayout.CENTER); // add container panel
+        panel2 = new JPanel(); 
+        panel2.add(boardPanel, BorderLayout.CENTER); 
+        add(panel2, BorderLayout.CENTER); 
 
-        setSize(300, 225); // set size of window
-        setVisible(true); // show window
+        setSize(300, 225); 
+        setVisible(true); 
 
         startClient();
     }
 
-    // start the client thread
+    
     public void startClient() {
-        // connect to server and get streams
+        
         try {
-            // make connection to server
+            
             connection = new Socket(InetAddress.getByName(ticTacToeHost), 12345);
 
-            // get streams for input and output
+            
             input = new Scanner(connection.getInputStream());
             output = new Formatter(connection.getOutputStream());
         } catch (IOException ioException) {
             System.out.println(ioException.toString());
         }
 
-        // create and start worker thread for this client
+        
         ExecutorService worker = Executors.newFixedThreadPool(1);
-        worker.execute(this); // execute client
+        worker.execute(this); 
     }
     @Override
     public void run() {
-        myMark = input.nextLine(); // get player's mark (X or O)
+        myMark = input.nextLine(); 
 
         SwingUtilities.invokeLater(() -> {
-            // display player's mark
+            
             idField.setText("You are player \"" + myMark + "\"");
         });
 
-        myTurn = (myMark.equals(X_MARK)); // determine if client's turn
+        myTurn = (myMark.equals(X_MARK)); 
 
-        // receive messages sent to client and output them
+        
         while (true) {
             if (input.hasNextLine()) {
                 processMessage(input.nextLine());
@@ -109,120 +109,120 @@ public class Client extends JFrame implements Runnable {
         }
     }
 
-    // process messages sent to the client
+    
     private void processMessage(String message) {
-        // valid move occurred
+        
         switch (message) {
             case "Valid move.":
                 displayMessage("Valid move, please wait.\n");
-                setMark(currentSquare, myMark); // set mark in square
+                setMark(currentSquare, myMark); 
                 break;
             case "Invalid move, try again":
-                displayMessage(message + "\n"); // display invalid move
-                myTurn = true; // still this client's turn
+                displayMessage(message + "\n"); 
+                myTurn = true; 
                 break;
             case "Opponent moved":
-                int location = input.nextInt(); // get move location
-                input.nextLine(); // skip newline after int location
-                int row = location / 3; // calculate row
-                int column = location % 3; // calculate column
+                int location = input.nextInt(); 
+                input.nextLine(); 
+                int row = location / 3; 
+                int column = location % 3; 
                 setMark(board[row][column],
-                        (myMark.equals(X_MARK) ? O_MARK : X_MARK)); // mark move
+                        (myMark.equals(X_MARK) ? O_MARK : X_MARK)); 
                 displayMessage("Opponent moved. Your turn.\n");
-                myTurn = true; // now this client's turn
+                myTurn = true; 
                 break;
             case "DEFEAT":
             case "TIE":
             case "VICTORY":
-                //  Game is over, display the results and stop game
-                displayMessage(message + "\n"); // display the message
+                
+                displayMessage(message + "\n"); 
                 myTurn = false;
                 break;
             default:
-                displayMessage(message + "\n"); // display the message
+                displayMessage(message + "\n"); 
                 break;
         }
     }
 
-    // manipulate displayArea in event-dispatch thread
+    
     private void displayMessage(final String messageToDisplay) {
         SwingUtilities.invokeLater(() -> {
-            displayArea.append(messageToDisplay); // updates output
+            displayArea.append(messageToDisplay); 
         });
     }
 
-    // utility method to set mark on board in event-dispatch thread
+    
     private void setMark(final Square squareToMark, final String mark) {
         SwingUtilities.invokeLater(() -> {
-            squareToMark.setMark(mark); // set mark in square
+            squareToMark.setMark(mark); 
         });
     }
 
-    // send message to server indicating clicked square
+    
     public void sendClickedSquare(int location) {
-        // if it is my turn
+        
         if (myTurn) {
-            output.format("%d\n", location); // send location to server
+            output.format("%d\n", location); 
             output.flush();
-            myTurn = false; // not my turn any more
+            myTurn = false; 
         }
     }
 
-    // set current Square
+    
     public void setCurrentSquare(Square square) {
-        currentSquare = square; // set current square to argument
+        currentSquare = square; 
     }
 
-    // private inner class for the squares on the board
+    
     private class Square extends JPanel {
 
-        private String mark; // mark to be drawn in this square
-        private final int location; // location of square
+        private String mark; 
+        private final int location; 
 
         public Square(String squareMark, int squareLocation) {
-            mark = squareMark; // set mark for this square
-            location = squareLocation; // set location of this square
+            mark = squareMark; 
+            location = squareLocation; 
 
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    setCurrentSquare(Square.this); // set current square
+                    setCurrentSquare(Square.this); 
 
-                    // send location of this square
+                    
                     sendClickedSquare(getSquareLocation());
                 }
             });
         }
 
-        // return preferred size of Square
+        
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension(30, 30); // return preferred size
+            return new Dimension(30, 30); 
         }
 
-        // return minimum size of Square
+        
         @Override
         public Dimension getMinimumSize() {
-            return getPreferredSize(); // return preferred size
+            return getPreferredSize(); 
         }
 
-        // set mark for Square
+        
         public void setMark(String newMark) {
-            mark = newMark; // set mark of square
-            repaint(); // repaint square
+            mark = newMark; 
+            repaint(); 
         }
 
-        // return Square location
+        
         public int getSquareLocation() {
-            return location; // return location of square
+            return location; 
         }
 
-        // draw Square
+        
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
-            g.drawRect(0, 0, 29, 29); // draw square
-            g.drawString(mark, 11, 20); // draw mark
+            g.drawRect(0, 0, 29, 29); 
+            g.drawString(mark, 11, 20); 
         }
     }
 
