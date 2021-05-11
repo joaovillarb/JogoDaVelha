@@ -96,7 +96,7 @@ public class Client extends JFrame implements Runnable {
 
         SwingUtilities.invokeLater(() -> {
             // display player's mark
-            idField.setText("Você é o jogador \"" + myMark + "\"");
+            idField.setText("You are player \"" + myMark + "\"");
         });
 
         myTurn = (myMark.equals(X_MARK)); // determine if client's turn
@@ -113,27 +113,27 @@ public class Client extends JFrame implements Runnable {
     private void processMessage(String message) {
         // valid move occurred
         switch (message) {
-            case "Movimento válido.":
-                displayMessage("Movimento válido, favor esperar.\n");
+            case "Valid move.":
+                displayMessage("Valid move, please wait.\n");
                 setMark(currentSquare, myMark); // set mark in square
                 break;
-            case "Movimento inválido, tente novamente.":
+            case "Invalid move, try again":
                 displayMessage(message + "\n"); // display invalid move
                 myTurn = true; // still this client's turn
                 break;
-            case "Oponente jogou":
+            case "Opponent moved":
                 int location = input.nextInt(); // get move location
                 input.nextLine(); // skip newline after int location
                 int row = location / 3; // calculate row
                 int column = location % 3; // calculate column
                 setMark(board[row][column],
                         (myMark.equals(X_MARK) ? O_MARK : X_MARK)); // mark move
-                displayMessage("Oponente jogou. Sua vez!\n");
+                displayMessage("Opponent moved. Your turn.\n");
                 myTurn = true; // now this client's turn
                 break;
-            case "DERROTA":
-            case "EMPATE":
-            case "VITORIA":
+            case "DEFEAT":
+            case "TIE":
+            case "VICTORY":
                 //  Game is over, display the results and stop game
                 displayMessage(message + "\n"); // display the message
                 myTurn = false;
