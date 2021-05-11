@@ -96,7 +96,7 @@ public class Client extends JFrame implements Runnable {
 
         SwingUtilities.invokeLater(() -> {
             // display player's mark
-            idField.setText("You are player \"" + myMark + "\"");
+            idField.setText("Você é o jogador \"" + myMark + "\"");
         });
 
         myTurn = (myMark.equals(X_MARK)); // determine if client's turn
@@ -111,29 +111,29 @@ public class Client extends JFrame implements Runnable {
 
     // process messages sent to the client
     private void processMessage(String message) {
-        // valid move occurred
+        // Movimento válido occurred
         switch (message) {
-            case "Valid move.":
-                displayMessage("Valid move, please wait.\n");
+            case "Movimento válido.":
+                displayMessage("Movimento válido, favor espere.\n");
                 setMark(currentSquare, myMark); // set mark in square
                 break;
-            case "Invalid move, try again":
-                displayMessage(message + "\n"); // display invalid move
+            case "Movimento inválido, tente novamente.":
+                displayMessage(message + "\n"); // display inMovimento válido
                 myTurn = true; // still this client's turn
                 break;
-            case "Opponent moved":
+            case "Adversário jogou.":
                 int location = input.nextInt(); // get move location
                 input.nextLine(); // skip newline after int location
                 int row = location / 3; // calculate row
                 int column = location % 3; // calculate column
                 setMark(board[row][column],
                         (myMark.equals(X_MARK) ? O_MARK : X_MARK)); // mark move
-                displayMessage("Opponent moved. Your turn.\n");
+                displayMessage("Adversário jogou. Sua vez.\n");
                 myTurn = true; // now this client's turn
                 break;
-            case "DEFEAT":
-            case "TIE":
-            case "VICTORY":
+            case "DERROTA":
+            case "EMPATE":
+            case "VITÓRIA":
                 //  Game is over, display the results and stop game
                 displayMessage(message + "\n"); // display the message
                 myTurn = false;
